@@ -4,3 +4,4 @@ CONFIGS.py
 org.*
 migrations/
 *.py[cod]
+debug.log

@@ -3,3 +3,4 @@
 CONFIGS.py
 org.*
 migrations/
+*.py[cod]

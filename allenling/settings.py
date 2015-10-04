@@ -150,7 +150,7 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
         },
-        'debug_log_handler': {
+        'debug_file_handler': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': DEBUG_LOG,
@@ -163,7 +163,7 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['console'],  # ['mail_admins', 'sentry'] using sentry to track 500 error setup when wsgi starts
+            'handlers': ['debug_file_handler'],  # ['mail_admins', 'sentry'] using sentry to track 500 error setup when wsgi starts
             'level': 'ERROR',
             'propagate': True,
         },

@@ -151,7 +151,7 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
         'debug_file_handler': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': DEBUG_LOG,
             'mode': 'a',

@@ -5,3 +5,4 @@ org.*
 migrations/
 *.py[cod]
 debug.log
+*.sqlite3

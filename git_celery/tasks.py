@@ -29,31 +29,40 @@ def create_article():
     Article.objects.bulk_create(articles_list)
 
 
-def update_article(articles):
-    if not articles:
+def update_article(action, title):
+    # 删除
+    acticle = Article.objects.get(title=title)
+    if action == 'D':
+        acticle.delete()
         return
-    for article in articles:
-        title = article.split('b/')[1]
-        with open(os.path.join(os.environ['GIT_REPO_PATH'], article), 'r') as f:
-            article, created = Article.objects.get_or_create(title=title, defaults={'html_content': mark_safe(publish_parts(f, writer='html')['html_body']).strip(),
-                                                                                    'slug': slugify(title)})
-            if not created:
-                article.html_content = publish_parts(f, writer='html')['html_body']
-                article.slug = slugify(title)
-                article.save()
+    # 修改或者新增, 直接update_or_create
+    elif action == 'M' or action == 'A':
+        with open(os.path.join(os.environ['GIT_REPO_PATH'], title)) as f:
+            Article.objects.update_or_create(title=title, defaults={'html_content': mark_safe(publish_parts(f, writer='html')['html_body']).strip(),
+                                                                    'slug': slugify(title)})
+    else:
+        logger.warning('unkwon git action: %s, article: %s', action, title)
 
 
-def pull_articles():
+def sync_article():
     if os.path.isdir(os.environ['GIT_REPO_PATH']):
         subprocess.call(['git', 'clone', os.environ['GIT_REPO_LINK']])
         create_article()
         break
     os.chdir(os.environ['GIT_REPO_PATH'])
-    subprocess.call(['git', 'fetch'])
-    x = subprocess.check_output(["git", "diff", "master", "origin/master"])
-    articles = [i for i in x.splitlines() if 'diff --git ' in i]
-    subprocess.call(['git', 'pull'])
-    update_article(articles)
+    pull_res = subprocess.check_output(['git', 'pull'])
+    # 没有更新
+    if pull_res == 'Already up-to-date.\n':
+        return
+    # 取第一行的header hash值
+    current_header = subprocess.check_output(['git', 'log', "--pretty=format:'%h'", '-n', '1']).replace("'", "")
+    logger.info('git header: %s', current_header)
+    # 修改的文件
+    log_res = subprocess.check_output(['git', 'diff-tree', '--no-commit-id -r', current_header])
+    for f in log_res.splitline():
+        action, title = f.split(' ')[-1].split('\t')
+        update_article(action, title)
 
 if __name__ == '__main__':
-    pull_articles()
+    sync_article()
+    print 'sync article done!'

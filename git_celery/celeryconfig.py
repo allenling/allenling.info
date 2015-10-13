@@ -7,9 +7,9 @@ name = __name__.split('.')[0]
 CELERYD_PREFETCH_MULTIPLIER = 1
 
 # Message Routing
-CELERY_QUEUES = (Queue('PULL_ARTICLES', Exchange('PULL_ARTICLES', type='direct'), routing_key='PULL_ARTICLES'),
+CELERY_QUEUES = (Queue('SYNC_ARTICLE', Exchange('SYNC_ARTICLE', type='direct'), routing_key='SYNC_ARTICLE'),
                  )
-CELERY_ROUTES = {'%s.tasks.PULL_ARTICLES' % name: {'queue': 'PULL_ARTICLES'},
+CELERY_ROUTES = {'%s.tasks.SYNC_ARTICLE' % name: {'queue': 'SYNC_ARTICLE'},
                  }
 
 # Broker Settings
@@ -46,7 +46,7 @@ CELERYD_MAX_TASKS_PER_CHILD = 1000
 # CELERYD_HIJACK_ROOT_LOGGER = False
 # CELERY_ALWAYS_EAGER = True
 
-CELERYBEAT_SCHEDULE = {'pull-every-day': {'task': '%s.tasks.pull_articles' % name,
+CELERYBEAT_SCHEDULE = {'sync-every-day': {'task': '%s.tasks.sync_article' % name,
                                                   'schedule': crontab(hour=23, minute=50),
                                           },
                        }

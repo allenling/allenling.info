@@ -14,6 +14,8 @@ from django.template.defaultfilters import slugify
 
 from blog.models import Article
 
+from git_celery.celery import celery
+
 name = __name__.split('.')[0]
 
 logger = logging.getLogger(name)
@@ -31,9 +33,8 @@ def create_article():
 
 def update_article(action, title):
     # 删除
-    acticle = Article.objects.get(title=title)
     if action == 'D':
-        acticle.delete()
+        Article.objects.get(title=title).delete()
         return
     # 修改或者新增, 直接update_or_create
     elif action == 'M' or action == 'A':
@@ -44,6 +45,7 @@ def update_article(action, title):
         logger.warning('unkwon git action: %s, article: %s', action, title)
 
 
+@celery.task
 def sync_article():
     if os.path.isdir(os.environ['GIT_REPO_PATH']):
         subprocess.call(['git', 'clone', os.environ['GIT_REPO_LINK']])

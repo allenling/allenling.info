@@ -60,7 +60,12 @@ def sync_article():
     # 修改的文件
     log_res = subprocess.check_output(['git', 'diff-tree', '--no-commit-id -r', current_header])
     for f in log_res.splitline():
-        action, title = f.split(' ')[-1].split('\t')
+        action, rst = f.split(' ')[-1].split('\t')
+        # 非.rst文件不track
+        if not rst.endswith('.rst'):
+            continue
+        # 获取文章标题
+        title = os.path.splitext(rst)[0]
         update_article(action, title)
 
 if __name__ == '__main__':

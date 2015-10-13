@@ -47,6 +47,8 @@ def update_article(action, title):
 def sync_article():
     if os.path.isdir(os.environ['GIT_REPO_PATH']):
         subprocess.call(['git', 'clone', os.environ['GIT_REPO_LINK']])
+        current_header = subprocess.check_output(['git', 'log', "--pretty=format:'%h'", '-n', '1']).replace("'", "")
+        logger.info('git clone, and header: %s', current_header)
         create_article()
         break
     os.chdir(os.environ['GIT_REPO_PATH'])
@@ -54,7 +56,7 @@ def sync_article():
     # 没有更新
     if pull_res == 'Already up-to-date.\n':
         return
-    # 取第一行的header hash值
+    # 取最后一个commit的hash值
     current_header = subprocess.check_output(['git', 'log', "--pretty=format:'%h'", '-n', '1']).replace("'", "")
     logger.info('git header: %s', current_header)
     # 修改的文件
